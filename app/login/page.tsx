@@ -4,7 +4,7 @@ import {useRouter} from "next/navigation";
 import Link from "next/link";
 import {BookOpenCheck,LockKeyhole,ArrowRight} from "lucide-react";
 export default function Login(){
- const router=useRouter(),[email,setEmail]=useState("demo@abhyaasvit.test"),[password,setPassword]=useState("Demo@2026Abhyaas");
+ const router=useRouter(),[email,setEmail]=useState(""),[password,setPassword]=useState("");
  const [pending,setPending]=useState(false),[error,setError]=useState("");
  async function submit(e:FormEvent){e.preventDefault();setPending(true);setError("");
   try{const r=await fetch("/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,password})});
@@ -19,7 +19,7 @@ export default function Login(){
      <label className="block text-sm font-semibold">Password<input className="field mt-1.5" required type="password" value={password} onChange={e=>setPassword(e.target.value)}/></label>
      {error&&<p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
      <button disabled={pending} className="btn-primary w-full">{pending?"Signing in…":"Enter workspace"} <ArrowRight size={16}/></button></form>
-    <div className="mt-5 rounded-xl bg-indigo-50 px-4 py-3 text-xs text-indigo-700"><strong>Local demo:</strong> The form is prefilled with the seeded demo account. Remove it before production.</div>
+    {process.env.NODE_ENV!=="production"&&<div className="mt-5 rounded-xl bg-indigo-50 px-4 py-3 text-xs text-indigo-700"><strong>Local development:</strong> Use the demo credentials in the README after running the seed.</div>}
     <p className="mt-6 text-center text-sm text-slate-500">New here? <Link className="font-bold text-indigo-600" href="/register">Create account</Link></p>
    </div>
   </div>
