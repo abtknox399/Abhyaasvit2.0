@@ -1,12 +1,52 @@
-generator client { provider = "prisma-client-js" }
-datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
-enum UserRole { STUDENT ADMIN }
-enum QuestionType { MCQ NUMERICAL CODE_OUTPUT SUBJECTIVE }
-enum QuestionSource { ORIGINAL_DEMO VERIFIED_PYQ TUTORIAL LAB_VIVA AI_DRAFT }
-enum Difficulty { EASY MEDIUM HARD }
-enum TestKind { UNIT MSE ESE FULL SPEED CUSTOM MISTAKES }
-enum AttemptStatus { IN_PROGRESS SUBMITTED EXPIRED }
-enum ImportStatus { DRAFT REVIEWED PUBLISHED REJECTED }
+generator client {
+ provider = "prisma-client-js"
+}
+datasource db {
+ provider = "postgresql"
+ url = env("DATABASE_URL")
+}
+enum UserRole {
+ STUDENT
+ ADMIN
+}
+enum QuestionType {
+ MCQ
+ NUMERICAL
+ CODE_OUTPUT
+ SUBJECTIVE
+}
+enum QuestionSource {
+ ORIGINAL_DEMO
+ VERIFIED_PYQ
+ TUTORIAL
+ LAB_VIVA
+ AI_DRAFT
+}
+enum Difficulty {
+ EASY
+ MEDIUM
+ HARD
+}
+enum TestKind {
+ UNIT
+ MSE
+ ESE
+ FULL
+ SPEED
+ CUSTOM
+ MISTAKES
+}
+enum AttemptStatus {
+ IN_PROGRESS
+ SUBMITTED
+ EXPIRED
+}
+enum ImportStatus {
+ DRAFT
+ REVIEWED
+ PUBLISHED
+ REJECTED
+}
 model User {
  id String @id @default(cuid())
  email String @unique
