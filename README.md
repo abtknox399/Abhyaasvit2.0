@@ -25,7 +25,7 @@ Visit http://localhost:3000. Sign in with **demo@abhyaasvit.test** / **Demo@2026
 - Results with **15 diagnostic sections**, score and pace, units/COs, weakness flags, answer solutions and recommended drills. **Predicted grades and peer stats are never presented as official without actual cohort data and published rules.**
 - Bookmarks with notes/tags, mistake retries, active-recall flashcards, and student-specific study plans.
 - Exam Hub with tentative/unverified state until administrator confirms dates; campus, building, room, seat and notice source fields.
-- Syllabus Studio: paste text or upload a PDF up to 8MB, structured parse, manual review and publish. Optional LLM-assisted draft generation with \`OPENAI_API_KEY\`; no claims of AI output when unconfigured.
+- Syllabus Studio: paste text or upload a PDF up to 8MB, structured parse, admin-only non-destructive syllabus sync and schema-validated publication of editor-reviewed practice (AI_DRAFT, not official PYQ). Optional LLM-assisted draft generation with \`OPENAI_API_KEY\`; no claims of AI output when unconfigured.
 - Math/code scratchpad. Python/C/Java execution requires a **separately configured isolated runner**. The website never executes student code in the Next.js server.
 - Search, branch/year/semester selector, accessible light/dark theme, responsive academic dashboard.
 
