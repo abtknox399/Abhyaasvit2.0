@@ -70,6 +70,16 @@ async function main(){
  const draft=await request("/api/studio",{method:"POST",form,cookie});
  assert.equal(draft.status,201,JSON.stringify(draft.body));
  assert.equal(draft.body.item.status,"DRAFT","Generated content must stay unpublished");
+ const logout=await request("/api/auth/logout",{method:"POST",cookie});
+ assert.equal(logout.status,200,"Logout should revoke the server-side session");
+ const revoked=await request("/api/dashboard",{cookie});
+ assert.equal(revoked.status,401,"Old cookie must be rejected after logout");
+ for(let i=0;i<6;i++){
+  const badLogin=await request("/api/auth/login",{method:"POST",data:{email:"throttle-probe@abhyaasvit.test",password:"deliberately-invalid"}});
+  assert.equal(badLogin.status,401);
+ }
+ const throttled=await request("/api/auth/login",{method:"POST",data:{email:"throttle-probe@abhyaasvit.test",password:"deliberately-invalid"}});
+ assert.equal(throttled.status,429,"Repeated failed logins must be rate-limited");
  console.log("HTTP smoke passed: auth, catalog, CBT, private answers, scoring, bookmark, flashcard, timetable authorization, syllabus ingestion.");
 }
 main().catch(e=>{console.error(e);process.exitCode=1});

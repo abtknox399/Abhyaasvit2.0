@@ -66,7 +66,25 @@ model User {
  tasks StudyTask[]
  imports SyllabusImport[]
  preferences UserPreference?
+ sessions AuthSession[]
 }
+model AuthSession {
+ id String @id @default(cuid())
+ userId String
+ user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+ tokenId String @unique
+ expiresAt DateTime
+ revokedAt DateTime?
+ createdAt DateTime @default(now())
+ @@index([userId,expiresAt])
+}
+model AuthThrottle {
+ key String @id
+ failures Int @default(0)
+ windowStart DateTime @default(now())
+ blockedUntil DateTime?
+}
+
 model UserPreference {
  userId String @id
  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
