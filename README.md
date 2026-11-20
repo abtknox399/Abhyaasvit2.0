@@ -16,7 +16,7 @@ npm run db:setup
 npm run dev
 \`\`\`
 
-Visit http://localhost:3000. Sign in with **demo@abhyaasvit.test** / **Demo@2026Abhyaas**, or create an account. Replace \`AUTH_SECRET\` and disable/remove the seeded account before production. \`DATABASE_URL\` must be server-only.
+Visit http://localhost:3000. Sign in with **demo@abhyaasvit.test** / **Demo@2026Abhyaas**, or create an account. Replace \`AUTH_SECRET\` before production; the demo account is not seeded for production unless explicitly enabled with \`ENABLE_DEMO_ACCOUNT=true\`. \`DATABASE_URL\` must be server-only.
 
 ## What works
 
@@ -39,7 +39,7 @@ During this build both PDFs could not be directly opened by the source reader. T
 
 ## Security/production checklist
 
-Use a managed PostgreSQL database with TLS and least-privilege credentials; set \`AUTH_SECRET\` to an unpredictable production secret; provision HTTPS; configure rate limiting and monitoring; review authentication and upload security; remove demo credentials; run a full-browser accessibility and load test. Do not deploy automatically to the previous Vercel project. Admin flag is set only via database administration (not the registration API).
+Use a managed PostgreSQL database with TLS and least-privilege credentials; set \`AUTH_SECRET\` to an unpredictable production secret; provision HTTPS; configure rate limiting and monitoring; review authentication and upload security; leave ENABLE_DEMO_ACCOUNT disabled for production; run a full-browser accessibility and load test. Do not deploy automatically to the previous Vercel project. Admin flag is set only via database administration (not the registration API).
 
 ## Structure
 
