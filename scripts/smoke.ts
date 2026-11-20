@@ -15,6 +15,8 @@ async function run(){
  assert.equal(pointFor({type:"MCQ",correctAnswer:"A",maxMarks:4,negativeMarks:1},"B"),-1);
  assert.equal(quadrant(false,200,120),"Overtime / Incorrect");
  assert.equal(evaluateArithmetic("(24+16)/8"),5);
+ assert.equal(evaluateArithmetic("3*-2"),-6);
+ assert.equal(evaluateArithmetic("-(5-2)"),-3);
  const q=await db.question.findFirstOrThrow();
  const user=await db.user.findFirstOrThrow({where:{email:"demo@abhyaasvit.test"}});
  const test=await db.testAttempt.create({data:{userId:user.id,title:"CI smoke test",kind:"UNIT",durationSeconds:600,

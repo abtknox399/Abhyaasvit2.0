@@ -44,6 +44,10 @@ async function main(){
  assert.equal(report.status,200);
  assert.ok(report.body.attempt.score===4,"Expected a correct 4-mark numerical response");
  assert.equal(report.body.items.length,2);
+ const dashboard=await request("/api/dashboard",{cookie});
+ assert.equal(dashboard.status,200);
+ assert.ok(dashboard.body.subjects.find(x=>x.code==="ES26105")?.solved>=1,
+  "Submitted CBT answers should contribute to course progress and daily practice");
  const late=await request("/api/attempts/"+id,{method:"PATCH",cookie,data:{itemId:first.id,action:"save",response:"6",marked:false}});
  assert.equal(late.status,409,"Submitted attempts must be immutable");
  const bookmark=await request("/api/bookmarks",{method:"POST",cookie,data:{questionId:report.body.items[0].questionId,tags:["Formula"],note:"Remember resistors in series"}});

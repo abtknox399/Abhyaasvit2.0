@@ -2,6 +2,7 @@ import {NextRequest,NextResponse} from "next/server";
 import {db} from "@/lib/db";
 import {apiUser,unauthorized,bad,failure,jsonBody,asString} from "@/lib/api";
 import {TestKind} from "@prisma/client";
+import {checkAnswer} from "@/lib/scoring";
 export async function GET(){
  const user=await apiUser();if(!user)return unauthorized();
  try{
@@ -30,8 +31,12 @@ export async function POST(request:Request){
    title=template.title;questionIds=template.questions.map(q=>q.questionId);
   }else if(kind==="MISTAKES"){
    const missed=await db.practiceLog.findMany({where:{userId:user.id,correct:false},orderBy:{answeredAt:"desc"},take:250,select:{questionId:true}});
-   const inTests=await db.attemptQuestion.findMany({where:{attempt:{userId:user.id,status:"SUBMITTED"},response:{not:null}},include:{question:true},take:300});
-   const fromTests=inTests.filter(x=>!x.response||x.question.correctAnswer.trim().toLowerCase()!==x.response.trim().toLowerCase()).map(x=>x.questionId);
+   const inTests=await db.attemptQuestion.findMany({where:{attempt:{userId:user.id,status:"SUBMITTED"}},include:{question:true},take:300});
+   const fromTests=inTests.filter(x=>{
+    const q=x.question;
+    if(q.type==="SUBJECTIVE")return !x.response?.trim()||(x.selfMarks!==null&&x.selfMarks<q.maxMarks);
+    return !checkAnswer(q.type,q.correctAnswer,x.response); // Includes skipped objective questions.
+   }).map(x=>x.questionId);
    questionIds=[...new Set([...missed.map(q=>q.questionId),...fromTests])].slice(0,count);
    title="Re-attempt my mistakes";
   }else{
