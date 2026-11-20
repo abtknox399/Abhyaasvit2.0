@@ -16,7 +16,7 @@ export async function GET(){
 export async function POST(request:Request){
  const user=await apiUser();if(!user)return unauthorized();
  const body=await jsonBody(request),questionId=asString(body?.questionId,100),note=asString(body?.note,1500);
- const tags=Array.isArray(body?.tags)?[...new Set(body.tags.filter((t:unknown)=>typeof t==="string").map((t:string)=>t.replace(/[^A-Za-z0-9_-]/g,"").slice(0,30)))].slice(0,8):[];
+ const tags:string[]=Array.isArray(body?.tags)?[...new Set<string>((body.tags as unknown[]).filter((t):t is string=>typeof t==="string").map(t=>t.replace(/[^A-Za-z0-9_-]/g,"").slice(0,30)).filter(Boolean))].slice(0,8):[];
  if(!questionId)return bad("Question is required");
  try{
   const q=await db.question.findUnique({where:{id:questionId}});if(!q)return bad("Unknown question");
