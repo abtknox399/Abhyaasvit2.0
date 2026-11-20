@@ -1,0 +1,39 @@
+name: Independent Postgres integration
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: abhyaas
+          POSTGRES_USER: abhyaas
+          POSTGRES_PASSWORD: ci-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U abhyaas -d abhyaas"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 15
+    env:
+      DATABASE_URL: "postgresql://abhyaas:ci-password@localhost:5432/abhyaas"
+      DEMO_PASSWORD: "CI-only-demo-password"
+      AUTH_SECRET: "CI-only-secret-that-is-not-used-on-live-users"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: "22"}
+      - name: Install packages
+        run: npm install --no-audit --no-fund
+      - name: Apply Prisma schema
+        run: npx prisma db push --accept-data-loss
+      - name: Seed original sample material
+        run: npm run db:seed
+      - name: Database and scoring integration test
+        run: npm run test:smoke

@@ -1,0 +1,19 @@
+services:
+  database:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: abhyaas
+      POSTGRES_USER: abhyaas
+      POSTGRES_PASSWORD: abhyaas_local
+    ports:
+      - "127.0.0.1:5434:5432"
+    volumes:
+      - abhyaas_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U abhyaas -d abhyaas"]
+      interval: 5s
+      timeout: 4s
+      retries: 10
+volumes:
+  abhyaas_pg:

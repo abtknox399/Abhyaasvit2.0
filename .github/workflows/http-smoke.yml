@@ -1,0 +1,54 @@
+name: HTTP end-to-end API smoke
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: abhyaas
+          POSTGRES_USER: abhyaas
+          POSTGRES_PASSWORD: ci-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U abhyaas -d abhyaas"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 15
+    env:
+      DATABASE_URL: "postgresql://abhyaas:ci-password@localhost:5432/abhyaas"
+      DEMO_PASSWORD: "CI-only-demo-password"
+      AUTH_SECRET: "CI-only-secret-that-is-not-used-on-live-users"
+      OPENAI_API_KEY: ""
+      NODE_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: "22"}
+      - name: Install
+        run: npm install --no-audit --no-fund
+      - name: Prepare schema and seed
+        run: npm run db:setup
+      - name: Build Next
+        run: npm run build
+      - name: Start HTTP app
+        run: |
+          npm run start > /tmp/abhyaas-next.log 2>&1 &
+          echo $! > /tmp/abhyaas-next.pid
+          for i in $(seq 1 45); do
+            if curl -fsS http://127.0.0.1:3000/ >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/abhyaas-next.log
+          exit 1
+      - name: Exercise authorized student API journey
+        run: node scripts/http-smoke.mjs
+      - name: Print server errors if test fails
+        if: failure()
+        run: tail -100 /tmp/abhyaas-next.log || true

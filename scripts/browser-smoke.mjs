@@ -1,0 +1,51 @@
+import assert from "node:assert/strict";
+import {chromium} from "@playwright/test";
+const base=process.env.SMOKE_BASE_URL||"http://127.0.0.1:3000";
+const browser=await chromium.launch({headless:true,args:["--no-sandbox"]});
+const page=await browser.newPage({viewport:{width:1440,height:950},timezoneId:"Asia/Kolkata"});
+page.setDefaultTimeout(15000);
+try{
+ await page.goto(base+"/login");
+ await page.getByLabel("Email").fill("demo@abhyaasvit.test");
+ await page.getByLabel("Password").fill(process.env.DEMO_PASSWORD||"Demo@2026Abhyaas");
+ await page.getByRole("button",{name:"Enter workspace"}).click();
+ await page.waitForURL("**/dashboard",{timeout:30000});
+ await page.getByText("Your courses",{exact:true}).waitFor({state:"visible",timeout:30000});
+ await page.getByRole("button",{name:"Enable dark mode"}).click();
+ assert.equal(await page.locator("html").evaluate(x=>x.classList.contains("dark")),true);
+ await page.getByRole("button",{name:"Enable light mode"}).click();
+ await page.getByRole("link",{name:"Mock Tests & CBT"}).click();
+ await page.getByText("Ready-to-attempt mock papers").waitFor({state:"visible"});
+ const boe=page.locator("article").filter({hasText:"Basics of Engineering · Circuits Quiz"});
+ await boe.getByRole("button",{name:"Start test"}).click();
+ await page.waitForURL(/\/attempt\/[^/]+/,{timeout:30000});
+ await page.getByText("Question palette",{exact:true}).waitFor({state:"visible"});
+ await page.getByLabel("Numerical answer").fill("8");
+ await page.getByRole("button",{name:"Save & Next"}).click();
+ await page.getByRole("radio").first().waitFor({state:"visible"});
+ await page.getByRole("radio").first().check();
+ await page.getByRole("button",{name:"Submit Exam"}).click();
+ await page.getByRole("button",{name:"Confirm submit"}).click();
+ await page.waitForURL(/\/analytics\/[^/]+/,{timeout:30000});
+ await page.getByText("Complete question-by-question solutions").waitFor({state:"visible",timeout:30000});
+ await page.getByText("15-part learning audit").waitFor({state:"visible"});
+ await page.getByRole("link",{name:"PYQ & Practice Vault"}).click();
+ await page.waitForURL("**/vault");
+ await page.getByText("Refine your practice").waitFor({state:"visible"});
+ await page.getByRole("button",{name:"Add to revision"}).click();
+ await page.getByText("Saved in your private Mistake Notebook",{exact:false}).waitFor({state:"visible"});
+ await page.getByRole("link",{name:"Mistake Notebook"}).click();
+ await page.getByRole("heading",{name:"Mistake & Revision Notebook"}).waitFor({state:"visible"});
+ await page.getByText("Saved questions",{exact:false}).waitFor({state:"visible"});
+ await page.getByRole("link",{name:"Flashcard Review"}).click();
+ await page.getByRole("heading",{name:"Five-Minute Flashcards"}).waitFor({state:"visible"});
+ await page.setViewportSize({width:390,height:850});
+ await page.getByRole("button",{name:"Open navigation"}).click();
+ await page.getByRole("link",{name:"Exam Timeline & Centers"}).click();
+ await page.getByRole("heading",{name:"Exam Timeline & Centers"}).waitFor({state:"visible"});
+ console.log("BROWSER PASS: login, dashboard, dark mode, timed CBT, report, Vault, bookmark, flashcards, mobile navigation, exam hub");
+}catch(error){
+ try{await page.screenshot({path:"/tmp/abhyaas-browser-failure.png",fullPage:true});}catch{}
+ console.error("BROWSER SMOKE FAILED:",error);
+ process.exitCode=1;
+}finally{await browser.close();}
