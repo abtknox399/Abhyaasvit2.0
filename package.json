@@ -12,7 +12,9 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "db:setup": "prisma db push && npm run db:seed",
-    "test:smoke": "tsx scripts/smoke.ts"
+    "test:smoke": "tsx scripts/smoke.ts",
+    "test:browser": "node scripts/browser-smoke.mjs",
+    "test:studio": "node scripts/studio-smoke.mjs"
   },
   "dependencies": {
     "next": "15.5.6",
@@ -46,6 +48,7 @@
     "@types/react-dom": "19.1.6",
     "@types/bcryptjs": "2.4.6",
     "@types/react-katex": "3.0.4",
-    "@types/pdf-parse": "1.1.5"
+    "@types/pdf-parse": "1.1.5",
+    "@playwright/test": "1.55.0"
   }
 }
