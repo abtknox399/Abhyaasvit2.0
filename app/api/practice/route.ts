@@ -26,6 +26,11 @@ export async function POST(request:Request){
  try{
   const q=await db.question.findUnique({where:{id:questionId}});
   if(!q)return bad("Unknown question");
+  // Prevent an active CBT from obtaining its answer key through the instant-practice API.
+  const live=await db.attemptQuestion.findFirst({where:{
+   questionId:q.id,attempt:{userId:user.id,status:"IN_PROGRESS",deadlineAt:{gt:new Date()}}
+  },select:{id:true}});
+  if(live)return NextResponse.json({error:"Finish your active mock before checking this question in practice mode."},{status:409});
   if(q.type==="SUBJECTIVE")return bad("Use the theory mock rubric to assess descriptive answers.");
   if(q.type==="MCQ"&&!/^[A-D]$/i.test(response))return bad("Select an MCQ option");
   const correct=checkAnswer(q.type,q.correctAnswer,response);
