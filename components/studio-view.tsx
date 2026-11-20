@@ -2,6 +2,7 @@
 import {useEffect,useState} from "react";
 import {BrainCircuit,BookOpenCheck,Check,ChevronDown,ChevronUp,FileInput,FileText,FileUp,Lightbulb,Lock,Search,Sparkles,UploadCloud,UserRoundCheck} from "lucide-react";
 import {getJson,reqJson} from "@/lib/types";
+import {StudioPublishPanel} from "@/components/studio-publish";
 type Import={id:string;title:string;sourceType:string;status:string;aiAssisted:boolean;createdAt:string;parsed:unknown;generated:unknown};
 type Result={item:{id:string;title:string;status:string;parsed:unknown;generated:unknown;aiAssisted:boolean};warning:string};
 type Account={role:string};
@@ -68,14 +69,14 @@ export function StudioView(){
      <div className="rounded-xl border p-4 dark:border-slate-700"><h3 className="text-sm font-extrabold">Question, note & formula drafts</h3>
       <pre className="scrollbar-thin mt-3 max-h-[450px] overflow-auto whitespace-pre-wrap break-words text-xs leading-6">{JSON.stringify(current.generated,null,2)}</pre></div>
     </div>
-    <div className="mt-5 flex flex-wrap gap-3"><button className="btn-secondary" onClick={()=>action(current.id,"review")}><Check size={16}/>Mark reviewed</button>
-     {role==="ADMIN"&&<button className="btn-primary" onClick={()=>action(current.id,"publish")}>Approve staging draft</button>}</div>
+    <StudioPublishPanel id={current.id} status={current.status} generated={current.generated} role={role} onUpdated={refresh}/>
    </section>}
   <section className="panel p-6"><h2 className="section-title">Import history</h2><div className="mt-4 divide-y dark:divide-slate-800">
    {recent.map(item=><div key={item.id} className="py-4"><div className="flex flex-wrap items-center justify-between gap-3">
      <div><p className="text-sm font-extrabold">{item.title}</p><p className="muted mt-1 text-xs">{item.sourceType} · {new Date(item.createdAt).toLocaleDateString("en-IN")} · {item.aiAssisted?"AI-assisted":"Parser-only"}</p></div>
      <div className="flex items-center gap-2"><span className="tag">{item.status}</span><button onClick={()=>setExpanded(v=>v.includes(item.id)?v.filter(x=>x!==item.id):[...v,item.id])}>
       {expanded.includes(item.id)?<ChevronUp size={16}/>:<ChevronDown size={16}/>}</button></div></div>
+    {expanded.includes(item.id)&&<StudioPublishPanel id={item.id} status={item.status} generated={item.generated} role={role} onUpdated={refresh}/>}
     {expanded.includes(item.id)&&<div className="mt-3 grid gap-3 lg:grid-cols-2"><pre className="max-h-64 overflow-auto rounded-lg bg-slate-50 p-3 text-xs dark:bg-slate-800">{JSON.stringify(item.parsed,null,2)}</pre>
      <pre className="max-h-64 overflow-auto rounded-lg bg-slate-50 p-3 text-xs dark:bg-slate-800">{JSON.stringify(item.generated,null,2)}</pre></div>}</div>)}
    {!recent.length&&<p className="muted py-8 text-center text-sm">No source imports yet. Your first document will appear here.</p>}</div></section>
