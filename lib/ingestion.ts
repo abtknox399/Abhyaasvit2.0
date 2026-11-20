@@ -22,7 +22,7 @@ export function parseSyllabus(raw:string,title:string):ParsedSyllabus{
  // Keep output small, reviewed and editable. Do not claim exhaustive PDF extraction.
  const nonempty=subjects.filter(s=>s.units.length);
  return {title,subjects:nonempty.length?nonempty:[{code:"UNVERIFIED",name:title,
-  units:[{number:1,title:"Unstructured syllabus (requires manual review)",topics:lines.slice(0,35)}]}]},
+  units:[{number:1,title:"Unstructured syllabus (requires manual review)",topics:lines.slice(0,35)}]}],
  warnings:["This is a draft extraction, not an official syllabus verification.","Check unit boundaries, topics, and source documents before publishing."]};
 }
 export function basicStudyKit(syllabus:ParsedSyllabus){
