@@ -105,7 +105,7 @@ export function AnalyticsView({id}:{id:string}){
    <div className="panel p-5"><h2 className="section-title">13 · Weakest units</h2><div className="mt-4 space-y-3">{data.weak.map(w=><div key={w.code+"-"+w.unit} className="rounded-xl bg-slate-50 p-3 dark:bg-slate-800">
     <div className="flex justify-between text-xs"><span className="font-bold">{w.code} · Unit {w.unit}</span><span className="text-amber-600">{w.lost} unearned</span></div>
     <p className="muted mt-1 text-[11px]">{w.title}</p>
-    <button className="mt-2 flex items-center gap-1 text-xs font-bold text-indigo-600" onClick={()=>weakDrill(w.code,w.unit)}>Generate 10-question drill <ArrowRight size={13}/></button>
+    <button className="mt-2 flex items-center gap-1 text-xs font-bold text-indigo-600" onClick={()=>weakDrill(w.code,w.unit||1)}>Generate 10-question drill <ArrowRight size={13}/></button>
    </div>)}</div></div>
    <div className="panel p-5"><h2 className="section-title">14 · Error and question review</h2>
     <div className="mt-4 grid grid-cols-2 gap-3">{[{label:"Wrong answers",value:data.mistakeCount},{label:"Unattempted",value:data.items.filter(q=>!q.attempted).length},
