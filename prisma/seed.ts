@@ -52,9 +52,12 @@ const qs:Q[]=[
  {id:"de02",code:"DEMO-SY-DS103",unit:1,topic:"First-order ODE",type:NUM,difficulty:M,stem:"For $\\frac{dy}{dx}=2x$ and $y(0)=1$, enter $y(2)$.",answer:"5",solution:"Integrating gives $y=x^2+C$, and $C=1$. Hence $y(2)=5$.",concept:"Integrate both sides and use the initial condition."}
 ];
 async function run(){
- const pwd=process.env.DEMO_PASSWORD || "Demo@2026Abhyaas";
- const user=await db.user.upsert({where:{email:"demo@abhyaasvit.test"},create:{email:"demo@abhyaasvit.test",name:"Demo Student",passwordHash:await hash(pwd,12),branch:"CSE-DS"},update:{}});
- await db.userPreference.upsert({where:{userId:user.id},create:{userId:user.id},update:{}});
+ // Never seed a universally known student password in production by default.
+ if(process.env.NODE_ENV!=="production"||process.env.ENABLE_DEMO_ACCOUNT==="true"){
+  const pwd=process.env.DEMO_PASSWORD || "Demo@2026Abhyaas";
+  const user=await db.user.upsert({where:{email:"demo@abhyaasvit.test"},create:{email:"demo@abhyaasvit.test",name:"Demo Student",passwordHash:await hash(pwd,12),branch:"CSE-DS"},update:{}});
+  await db.userPreference.upsert({where:{userId:user.id},create:{userId:user.id},update:{}});
+ }
  const courseIds=new Map<string,string>(),unitIds=new Map<string,string>(),topicIds=new Map<string,string>();
  for(const c of courses){
   const course=await db.course.upsert({where:{code:c.code},create:{code:c.code,title:c.title,year:c.year,semester:c.semester,module:c.module,branch:c.branch||"ALL",sourceUrl:c.year===1?FY:null,officialVerified:false},
