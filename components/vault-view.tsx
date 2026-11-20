@@ -6,7 +6,7 @@ import {MathText,CodeBlock} from "@/components/math";
 import {getJson,reqJson,type CatalogCourse,type SafeQuestion} from "@/lib/types";
 type Checked={correct:boolean;correctAnswer:string;solution:string;concept:string|null;xp:number};
 const reasons=["Formula","TrickyCode","ImportantPYQ","ConceptGap","CalculationError","MustRevise"];
-const sources=[{id:"",label:"All sources"},{id:"ORIGINAL_DEMO",label:"Original practice"},{id:"VERIFIED_PYQ",label:"Verified VIT PYQ"},{id:"TUTORIAL",label:"Tutorial Sheet"},{id:"LAB_VIVA",label:"Lab Viva"}];
+const sources=[{id:"",label:"All sources"},{id:"ORIGINAL_DEMO",label:"Original practice"},{id:"AI_DRAFT",label:"Editor-reviewed AI practice (not PYQ)"},{id:"VERIFIED_PYQ",label:"Verified VIT PYQ"},{id:"TUTORIAL",label:"Tutorial Sheet"},{id:"LAB_VIVA",label:"Lab Viva"}];
 export function VaultView({courseHint}:{courseHint?:string}){
  const [catalog,setCatalog]=useState<CatalogCourse[]>([]),[course,setCourse]=useState(courseHint||"ES26101"),[unit,setUnit]=useState(""),
  [source,setSource]=useState(""),[format,setFormat]=useState(""),[difficulty,setDifficulty]=useState(""),[topic,setTopic]=useState("");
