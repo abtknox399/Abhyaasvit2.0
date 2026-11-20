@@ -13,8 +13,8 @@ export async function POST(request:Request){
   if(action==="generate"){
    const eventId=asString(b?.eventId,100);
    const event=await db.examScheduleEvent.findFirst({where:{id:eventId,officialVerified:true,startsAt:{gt:new Date()}}});
-   if(!event||!event.startsAt)return bad("Select a verified future exam to generate a schedule");
-   const units=await db.syllabusUnit.findMany({where:{courseId:event.courseId||undefined},orderBy:{number:"asc"},take:12});
+   if(!event||!event.startsAt||!event.courseId)return bad("Select a verified future subject examination to generate a syllabus-linked schedule");
+   const units=await db.syllabusUnit.findMany({where:{courseId:event.courseId},orderBy:{number:"asc"},take:12});
    if(!units.length)return bad("No syllabus units found for this event");
    const remaining=Math.floor((event.startsAt.getTime()-Date.now())/86400000),days=Math.max(1,Math.min(remaining,30)),tasks=[];
    for(let d=0;d<days;d++){
