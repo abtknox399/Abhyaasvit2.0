@@ -32,6 +32,8 @@ async function main(){
  assert.ok(!JSON.stringify(launched.body).includes("correctAnswer"),"Answer key leaked before submission");
  assert.ok(!JSON.stringify(launched.body).includes("solution"),"Solution leaked before submission");
  const first=launched.body.attempt.items[0];
+ const leak=await request("/api/practice",{method:"POST",cookie,data:{questionId:first.question.id,response:"8"}});
+ assert.equal(leak.status,409,"Instant practice must not expose answer keys for live mock questions");
  const visited=await request("/api/attempts/"+id,{method:"PATCH",cookie,data:{itemId:first.id,action:"visit"}});
  assert.equal(visited.status,200);
  const saved=await request("/api/attempts/"+id,{method:"PATCH",cookie,data:{itemId:first.id,action:"save",response:"8",marked:false}});
