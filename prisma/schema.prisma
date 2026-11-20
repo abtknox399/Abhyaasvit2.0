@@ -1,0 +1,280 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
+enum UserRole { STUDENT ADMIN }
+enum QuestionType { MCQ NUMERICAL CODE_OUTPUT SUBJECTIVE }
+enum QuestionSource { ORIGINAL_DEMO VERIFIED_PYQ TUTORIAL LAB_VIVA AI_DRAFT }
+enum Difficulty { EASY MEDIUM HARD }
+enum TestKind { UNIT MSE ESE FULL SPEED CUSTOM MISTAKES }
+enum AttemptStatus { IN_PROGRESS SUBMITTED EXPIRED }
+enum ImportStatus { DRAFT REVIEWED PUBLISHED REJECTED }
+model User {
+ id String @id @default(cuid())
+ email String @unique
+ name String
+ passwordHash String
+ role UserRole @default(STUDENT)
+ academicYear String @default("2026-27")
+ studyYear Int @default(1)
+ semester Int @default(1)
+ branch String @default("CSE-DS")
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ attempts TestAttempt[]
+ bookmarks RevisionBookmark[]
+ answers PracticeLog[]
+ flashcards Flashcard[]
+ tasks StudyTask[]
+ imports SyllabusImport[]
+ preferences UserPreference?
+}
+model UserPreference {
+ userId String @id
+ user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+ dailyGoal Int @default(20)
+ totalXp Int @default(0)
+ lastPracticeAt DateTime?
+ updatedAt DateTime @updatedAt
+}
+model Course {
+ id String @id @default(cuid())
+ code String @unique
+ title String
+ year Int
+ semester Int
+ module String @default("COMMON")
+ branch String @default("ALL")
+ description String @default("")
+ officialVerified Boolean @default(false)
+ sourceUrl String?
+ units SyllabusUnit[]
+ questions Question[]
+ tests TestTemplate[]
+ resources Resource[]
+ events ExamScheduleEvent[]
+ @@index([year,semester,branch])
+}
+model SyllabusUnit {
+ id String @id @default(cuid())
+ courseId String
+ course Course @relation(fields:[courseId],references:[id],onDelete:Cascade)
+ number Int
+ section String @default("I")
+ title String
+ description String @default("")
+ weightage Int?
+ weightageVerified Boolean @default(false)
+ coCode String?
+ topics SyllabusTopic[]
+ questions Question[]
+ resources Resource[]
+ @@unique([courseId,number])
+}
+model SyllabusTopic {
+ id String @id @default(cuid())
+ unitId String
+ unit SyllabusUnit @relation(fields:[unitId],references:[id],onDelete:Cascade)
+ title String
+ priority String @default("NORMAL")
+ questions Question[]
+ @@index([unitId])
+}
+model Question {
+ id String @id @default(cuid())
+ courseId String
+ course Course @relation(fields:[courseId],references:[id])
+ unitId String
+ unit SyllabusUnit @relation(fields:[unitId],references:[id])
+ topicId String?
+ topic SyllabusTopic? @relation(fields:[topicId],references:[id])
+ type QuestionType
+ source QuestionSource @default(ORIGINAL_DEMO)
+ year Int?
+ sourceUrl String?
+ verified Boolean @default(false)
+ difficulty Difficulty @default(MEDIUM)
+ stem String @db.Text
+ options Json?
+ correctAnswer String @db.Text
+ solution String @db.Text
+ rubric Json?
+ concept String? @db.Text
+ code String? @db.Text
+ diagramUrl String?
+ maxMarks Int @default(4)
+ negativeMarks Int @default(0)
+ idealSeconds Int @default(90)
+ coCode String?
+ createdAt DateTime @default(now())
+ templateItems TestTemplateQuestion[]
+ attemptItems AttemptQuestion[]
+ bookmarks RevisionBookmark[]
+ practiceLogs PracticeLog[]
+ flashcards Flashcard[]
+ @@index([courseId,unitId,source,type])
+}
+model TestTemplate {
+ id String @id @default(cuid())
+ title String
+ description String @default("")
+ kind TestKind
+ courseId String?
+ course Course? @relation(fields:[courseId],references:[id])
+ durationMinutes Int
+ published Boolean @default(true)
+ officialPatternVerified Boolean @default(false)
+ questions TestTemplateQuestion[]
+ attempts TestAttempt[]
+}
+model TestTemplateQuestion {
+ id String @id @default(cuid())
+ templateId String
+ template TestTemplate @relation(fields:[templateId],references:[id],onDelete:Cascade)
+ questionId String
+ question Question @relation(fields:[questionId],references:[id])
+ position Int
+ @@unique([templateId,questionId])
+ @@unique([templateId,position])
+}
+model TestAttempt {
+ id String @id @default(cuid())
+ userId String
+ user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+ templateId String?
+ template TestTemplate? @relation(fields:[templateId],references:[id])
+ title String
+ kind TestKind
+ durationSeconds Int
+ startedAt DateTime @default(now())
+ deadlineAt DateTime
+ submittedAt DateTime?
+ status AttemptStatus @default(IN_PROGRESS)
+ score Float?
+ possibleMarks Float?
+ accuracy Float?
+ items AttemptQuestion[]
+ @@index([userId,startedAt])
+}
+model AttemptQuestion {
+ id String @id @default(cuid())
+ attemptId String
+ attempt TestAttempt @relation(fields:[attemptId],references:[id],onDelete:Cascade)
+ questionId String
+ question Question @relation(fields:[questionId],references:[id])
+ position Int
+ response String? @db.Text
+ selfMarks Float?
+ visited Boolean @default(false)
+ bookmarkedForReview Boolean @default(false)
+ visits Int @default(0)
+ answerChanges Int @default(0)
+ timeSeconds Int @default(0)
+ lastViewedAt DateTime?
+ savedAt DateTime?
+ @@unique([attemptId,questionId])
+ @@unique([attemptId,position])
+}
+model PracticeLog {
+ id String @id @default(cuid())
+ userId String
+ user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+ questionId String
+ question Question @relation(fields:[questionId],references:[id])
+ response String @db.Text
+ correct Boolean
+ answeredAt DateTime @default(now())
+ @@index([userId,answeredAt])
+}
+model RevisionBookmark {
+ id String @id @default(cuid())
+ userId String
+ user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+ questionId String
+ question Question @relation(fields:[questionId],references:[id])
+ tags String[] @default([])
+ note String @default("") @db.Text
+ createdAt DateTime @default(now())
+ dueAt DateTime @default(now())
+ intervalDays Int @default(1)
+ ease Float @default(2.5)
+ @@unique([userId,questionId])
+ @@index([userId,dueAt])
+}
+model Flashcard {
+ id String @id @default(cuid())
+ userId String
+ user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+ questionId String?
+ question Question? @relation(fields:[questionId],references:[id])
+ front String @db.Text
+ back String @db.Text
+ dueAt DateTime @default(now())
+ intervalDays Int @default(1)
+ ease Float @default(2.5)
+ reviews Int @default(0)
+ createdAt DateTime @default(now())
+ @@index([userId,dueAt])
+}
+model ExamScheduleEvent {
+ id String @id @default(cuid())
+ courseId String?
+ course Course? @relation(fields:[courseId],references:[id])
+ examType String
+ title String
+ academicYear String
+ semester Int
+ branch String @default("ALL")
+ startsAt DateTime?
+ endsAt DateTime?
+ campus String?
+ building String?
+ room String?
+ seat String?
+ shift String?
+ sourceUrl String?
+ officialVerified Boolean @default(false)
+ createdById String?
+ createdAt DateTime @default(now())
+ @@index([academicYear,semester,startsAt])
+}
+model Resource {
+ id String @id @default(cuid())
+ courseId String
+ course Course @relation(fields:[courseId],references:[id])
+ unitId String?
+ unit SyllabusUnit? @relation(fields:[unitId],references:[id])
+ kind String
+ title String
+ content String @db.Text
+ sourceUrl String?
+ verified Boolean @default(false)
+ priority Int @default(2)
+ createdAt DateTime @default(now())
+}
+model StudyTask {
+ id String @id @default(cuid())
+ userId String
+ user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+ title String
+ courseCode String?
+ dueAt DateTime
+ minutes Int @default(30)
+ completed Boolean @default(false)
+ autoGenerated Boolean @default(false)
+ @@index([userId,dueAt])
+}
+model SyllabusImport {
+ id String @id @default(cuid())
+ userId String
+ user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+ title String
+ sourceType String
+ originalFileName String?
+ rawText String @db.Text
+ parsed Json?
+ generated Json?
+ status ImportStatus @default(DRAFT)
+ aiAssisted Boolean @default(false)
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ @@index([userId,createdAt])
+}
