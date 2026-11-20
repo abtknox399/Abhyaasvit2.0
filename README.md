@@ -1,2 +1,51 @@
-# Abhyaasvit2.0
-Latest Version of Abhyaas vit
+# Abhyaas VIT · independent 2.0 build
+
+A newly built VIT Pune exam-preparation workspace with course catalog, chapter practice, timed CBT mock tests, analysis, revision notebook, resource kit, verified exam timeline, and an AI-assisted syllabus/PYQ staging studio.
+
+> **Independent repository.** Nothing imports from, deploys to, or connects to the previous Abhyaas VIT project, database, or Vercel application.
+
+## Local start
+
+Requires Node 20+ and Docker.
+
+\`\`\`bash
+cp .env.example .env
+docker compose up -d
+npm install
+npm run db:setup
+npm run dev
+\`\`\`
+
+Visit http://localhost:3000. Sign in with **demo@abhyaasvit.test** / **Demo@2026Abhyaas**, or create an account. Replace \`AUTH_SECRET\` and disable/remove the seeded account before production. \`DATABASE_URL\` must be server-only.
+
+## What works
+
+- Session-authenticated student data, personal study preferences, course catalog, original VIT-topic-aligned sample questions, chapter practice and immediate feedback.
+- Durable CBT attempts with five palette states, server-enforced deadline, persisted answers/visits/time, MCQ/numerical/program output and rubric-guided descriptive items.
+- Results with **15 diagnostic sections**, score and pace, units/COs, weakness flags, answer solutions and recommended drills. **Predicted grades and peer stats are never presented as official without actual cohort data and published rules.**
+- Bookmarks with notes/tags, mistake retries, active-recall flashcards, and student-specific study plans.
+- Exam Hub with tentative/unverified state until administrator confirms dates; campus, building, room, seat and notice source fields.
+- Syllabus Studio: paste text or upload a PDF up to 8MB, structured parse, manual review and publish. Optional LLM-assisted draft generation with \`OPENAI_API_KEY\`; no claims of AI output when unconfigured.
+- Math/code scratchpad. Python/C/Java execution requires a **separately configured isolated runner**. The website never executes student code in the Next.js server.
+- Search, branch/year/semester selector, accessible light/dark theme, responsive academic dashboard.
+
+## Data provenance and limits
+
+VIT Pune official FY 2026–27 source references:
+- [Official FY syllabus, user-provided URL](https://www.vit.edu/DESH/wp-content/uploads/2026/10/FYBTech_Syllabus_A.Y2026-27-Revision_2.pdf)
+- [Official FY Semester I academic calendar, user-provided URL](https://www.vit.edu/wp-content/uploads/2026/09/SCAN_AC_FIRST_YEAR_AY_26_27_SEM_I.pdf)
+
+During this build both PDFs could not be directly opened by the source reader. The seed uses **user-specified course outlines and original representative questions**, not a claim of line-by-line verification of the PDF. **No dates, room allocations, PYQs, weightages, or actual VIT marking rules have been invented.** All exam rules and official source material require admin verification before marking them official. SY courses are clearly illustrative pending a department-specific official syllabus.
+
+## Security/production checklist
+
+Use a managed PostgreSQL database with TLS and least-privilege credentials; set \`AUTH_SECRET\` to an unpredictable production secret; provision HTTPS; configure rate limiting and monitoring; review authentication and upload security; remove demo credentials; run a full-browser accessibility and load test. Do not deploy automatically to the previous Vercel project. Admin flag is set only via database administration (not the registration API).
+
+## Structure
+
+- \`prisma/schema.prisma\`, \`prisma/seed.ts\`: canonical models and deterministic demo data.
+- \`app/api/**\`: server-authenticated JSON/upload endpoints.
+- \`app/(workspace)/**\`: dashboard and application pages.
+- \`app/attempt/[id]/**\`: distraction-free timed test runner.
+- \`components/**\`: original UI and chart components.
+- \`lib/**\`: authentication, scoring, sample content, analysis, ingestion helpers.

@@ -1,0 +1,26 @@
+name: Typecheck and build
+on:
+  push:
+    branches: [main, "feat/**"]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: "22"}
+      - name: Install
+        run: npm install --no-audit --no-fund
+      - name: Generate Prisma client
+        run: npx prisma generate
+      - name: TypeScript
+        run: npx tsc --noEmit
+      - name: Next production build
+        env:
+          DATABASE_URL: "postgresql://placeholder:placeholder@localhost:5434/placeholder"
+          AUTH_SECRET: "CI-only-secret-that-is-not-used-on-live-users"
+        run: npm run build
