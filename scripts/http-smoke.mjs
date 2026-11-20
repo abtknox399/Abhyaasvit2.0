@@ -48,6 +48,13 @@ async function main(){
  assert.equal(dashboard.status,200);
  assert.ok(dashboard.body.subjects.find(x=>x.code==="ES26105")?.solved>=1,
   "Submitted CBT answers should contribute to course progress and daily practice");
+ const replay=await request("/api/tests",{method:"POST",cookie,data:{kind:"MISTAKES",count:10,minutes:10}});
+ assert.equal(replay.status,201,"Wrong or skipped questions must be retryable");
+ const retryAttempt=await request("/api/attempts/"+replay.body.attempt.id,{cookie});
+ assert.equal(retryAttempt.status,200);
+ const retriedIds=retryAttempt.body.attempt.items.map(x=>x.question.id);
+ assert.ok(retriedIds.includes(launched.body.attempt.items[1].question.id),"Skipped CBT answer missing from retry set");
+ assert.ok(!retriedIds.includes(first.question.id),"Correct CBT answer must not be marked a mistake");
  const late=await request("/api/attempts/"+id,{method:"PATCH",cookie,data:{itemId:first.id,action:"save",response:"6",marked:false}});
  assert.equal(late.status,409,"Submitted attempts must be immutable");
  const bookmark=await request("/api/bookmarks",{method:"POST",cookie,data:{questionId:report.body.items[0].questionId,tags:["Formula"],note:"Remember resistors in series"}});
